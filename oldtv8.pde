@@ -18,6 +18,9 @@ int rollingBarSpeedMultiplier = 9;
 int hRgbShift = 4;
 int vRgbShift = 6;
 float scanlineDarkness = 0.4f;
+int shiftSpeedDivisor = 20;
+int flickerMinAlpha = 95;//percent
+int rgbShiftMaxDuration = 45;//frames
 
 //how many frames before the effect stabilizes
 int powerOnFrames = 120;
@@ -31,23 +34,17 @@ int powerOnVRgbShift = 6;
 ChannelShiftMotion redX, redY, greenX, greenY, blueX, blueY;
 ChannelShiftMotion[] shiftMotions = new ChannelShiftMotion[6];
 
-int shiftSpeedDivisor = 20;
-
-int flickerMinAlpha = 95;//percent
-
-int rgbShiftMaxDuration = 45;//frames
-
 public enum Channel {RED, GREEN, BLUE};
 public enum Axis {X, Y};
 
 class ChannelShiftMotion {
   
+  Axis axis;
   float target;
   float offset;
   float speed;
   int flickerAlpha = 255;
   int shiftDurationRemaining = 0;
-  Axis axis;
   
   public ChannelShiftMotion(float target, float offset, float speed, Axis axis) {
     this.target = target;
@@ -216,7 +213,10 @@ PImage getChannel(PImage source, Channel c) {
 }
 
 void checkChannelMotion(ChannelShiftMotion channel) {
-  if(channel.shiftDurationRemaining <= 0 || (channel.target <= 0 && channel.offset <= channel.target) || (channel.target >= 0 && channel.offset >= channel.target)) {
+  if(channel.shiftDurationRemaining <= 0 ||
+    (channel.target <= 0 && channel.offset <= channel.target) ||
+    (channel.target >= 0 && channel.offset >= channel.target)) {
+    
    //set up a new animation
    if(channel.axis == Axis.Y) {
      channel.target = int(random(-1*vRgbShift, vRgbShift));
